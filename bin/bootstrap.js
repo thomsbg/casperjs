@@ -285,14 +285,16 @@ CasperError.prototype = Object.getPrototypeOf(new Error());
             return resolved;
         }
         function localModulePath(path) {
-            return resolveFile(path, phantom.casperScriptBaseDir || fs.workingDirectory);
+            return resolveFile(path, phantom.casperScriptBaseDir) ||
+                resolveFile(path, fs.workingDirectory);
         }
         var patchedRequire = function patchedRequire(path) {
             try {
-                return require(casperBuiltinPath(path) ||
-                               nodeModulePath(path)    ||
-                               localModulePath(path)   ||
-                               path);
+                path = casperBuiltinPath(path) ||
+                       nodeModulePath(path)    ||
+                       localModulePath(path)   ||
+                       path;
+                return require(path);
             } catch (e) {
                 throw new CasperError("Can't find module " + path);
             }
